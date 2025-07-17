@@ -46,12 +46,23 @@ export async function updateSession(request: NextRequest) {
   // with the Supabase client, your users may be randomly logged out.
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
+  const cookies = request.cookies.getAll();
+  const onboarded = cookies.find((cookie) => cookie.name === "onboarded")?.value === "true";
+
+  console.log("🚀🚀🚀 ~ file: middleware.ts:52 ~ updateSession ~ onboarded:", onboarded)
+
+  
+  if (!onboarded &&   !request.nextUrl.pathname.startsWith("/onboarding")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/onboarding";
+    request.cookies.set("onboarded", "true");
+    return NextResponse.redirect(url);
+  }
 
   if (
-    request.nextUrl.pathname !== "/" &&
     !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
+    !request.nextUrl.pathname.startsWith("/auth") &&
+    !request.nextUrl.pathname.startsWith("/onboarding")
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
