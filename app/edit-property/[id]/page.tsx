@@ -4,13 +4,14 @@ import { EditPropertyForm } from "@/components/edit-property-form";
 import { getPropertyTypes } from "@/app/actions/property-actions";
 
 interface EditPropertyPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditPropertyPage({ params }: EditPropertyPageProps) {
   const supabase = await createClient();
+  const { id } = await params;
 
   const { data, error } = await supabase.auth.getClaims();
   if (error || !data?.claims) {
@@ -26,7 +27,7 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
         PropertyType(name),
         PropertyImage(image_url)
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', data.claims.sub) // Ensure user owns this property
       .single(),
     getPropertyTypes()
