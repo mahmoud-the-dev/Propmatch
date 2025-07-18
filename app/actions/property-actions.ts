@@ -17,14 +17,27 @@ export interface PropertyFormData {
     description: string;
 }
 
-// Helper function to upload a single image to Supabase Storage
+/**
+ * Uploads a single image file to Supabase Storage
+ * 
+ * @param file - The image file to upload
+ * @param propertyId - Unique identifier for the property (used for organizing files)
+ * @param supabase - Supabase client instance
+ * @returns Promise<string> - Public URL of the uploaded image
+ * 
+ * @throws Error if upload fails
+ * 
+ * @example
+ * ```typescript
+ * const imageUrl = await uploadImageToStorage(file, "propertyId", supabase);
+ * console.log(imageUrl); // imageUrl
+ * ```
+ */
 async function uploadImageToStorage(file: File, propertyId: string, supabase: SupabaseClient): Promise<string> {
-    // Generate unique filename
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `property-images/${propertyId}/${fileName}`;
 
-    // Upload file to Supabase Storage
     const { data, error } = await supabase.storage
         .from('property-images')
         .upload(filePath, file, {
@@ -37,7 +50,6 @@ async function uploadImageToStorage(file: File, propertyId: string, supabase: Su
         throw new Error(`Failed to upload image: ${error.message}`);
     }
 
-    // Get public URL
     const { data: publicUrlData } = supabase.storage
         .from('property-images')
         .getPublicUrl(data.path);
@@ -45,10 +57,23 @@ async function uploadImageToStorage(file: File, propertyId: string, supabase: Su
     return publicUrlData.publicUrl;
 }
 
-// Helper function to delete an image from Supabase Storage
+/**
+ * Deletes an image file from Supabase Storage
+ * 
+ * @param imageUrl - Full public URL of the image to delete
+ * @param supabase - Supabase client instance
+ * 
+ * @description
+ * Extracts the file path from the public URL and removes the file from storage.
+ * Errors are logged but not thrown to prevent blocking other operations.
+ * 
+ * @example
+ * ```typescript
+ * await deleteImageFromStorage("imageUrl", supabase);
+ * ```
+ */
 async function deleteImageFromStorage(imageUrl: string, supabase: SupabaseClient): Promise<void> {
     try {
-        // Extract file path from URL
         const url = new URL(imageUrl);
         const pathParts = url.pathname.split('/');
         const bucketIndex = pathParts.findIndex(part => part === 'property-images');
@@ -62,16 +87,28 @@ async function deleteImageFromStorage(imageUrl: string, supabase: SupabaseClient
 
             if (error) {
                 console.error('Storage delete error:', error);
-                // Don't throw error for delete failures as it's not critical
             }
         }
     } catch (error) {
         console.error('Error parsing image URL for deletion:', error);
-        // Don't throw error for delete failures as it's not critical
     }
 }
 
-// Helper function to save image URLs to database
+/**
+ * Saves multiple image URLs to the PropertyImage table
+ * 
+ * @param propertyId - ID of the property to associate images with
+ * @param imageUrls - Array of public image URLs to save
+ * @param supabase - Supabase client instance
+ * 
+ * @throws Error if database insert fails
+ * 
+ * @example
+ * ```typescript
+ * const imageUrls = ["image1Url", "image2Url"];
+ * await saveImageUrls("property-123", imageUrls, supabase);
+ * ```
+ */
 async function saveImageUrls(propertyId: string, imageUrls: string[], supabase: SupabaseClient): Promise<void> {
     if (imageUrls.length === 0) return;
 
@@ -89,6 +126,17 @@ async function saveImageUrls(propertyId: string, imageUrls: string[], supabase: 
     }
 }
 
+/**
+ * Fetches all available property types from the database
+ * 
+ * @returns Promise<Array> - Array of property type objects with id and name
+ * 
+ * @example
+ * ```typescript
+ * const types = await getPropertyTypes();
+ * // [{ id: 1, name: "Apartment" }, { id: 2, name: "House" }]
+ * ```
+ */
 export async function getPropertyTypes() {
     const supabase = await createClient();
 
@@ -105,16 +153,40 @@ export async function getPropertyTypes() {
     return data || [];
 }
 
+/**
+ * Creates a new property with associated images
+ * 
+ * @param formData - FormData containing property details and image files
+ * 
+ * @description
+ * Process:
+ * 1. Validates user authentication
+ * 2. Extracts form fields and image files
+ * 3. Creates property record in database
+ * 4. Uploads images to Supabase Storage
+ * 5. Saves image URLs to PropertyImage table
+ * 6. Handles rollback if image upload fails
+ * 7. Redirects to home page on success
+ * 
+ * @throws Error if user not authenticated, property creation fails, or image upload fails
+ * 
+ * @example
+ * ```typescript
+ * const formData = new FormData();
+ * formData.append('title', 'Beautiful Apartment');
+ * formData.append('images', imageFile1);
+ * formData.append('images', imageFile2);
+ * await createProperty(formData);
+ * ```
+ */
 export async function createProperty(formData: FormData) {
     const supabase = await createClient();
 
-    // Get current user
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         throw new Error("You must be logged in to add a property");
     }
 
-    // Extract form fields
     const title = formData.get('title') as string;
     const location = formData.get('location') as string;
     const city = formData.get('city') as string;
@@ -125,11 +197,9 @@ export async function createProperty(formData: FormData) {
     const rate = parseInt(formData.get('rate') as string);
     const description = formData.get('description') as string;
 
-    // Extract images
     const images = formData.getAll('images') as File[];
     const validImages = images.filter(file => file instanceof File && file.size > 0);
 
-    // Create property record first
     const { data: property, error: propertyError } = await supabase
         .from('Property')
         .insert({
@@ -151,7 +221,6 @@ export async function createProperty(formData: FormData) {
         throw new Error(propertyError.message);
     }
 
-    // Upload images if any
     if (validImages.length > 0) {
         try {
             const imageUrls: string[] = [];
@@ -161,10 +230,8 @@ export async function createProperty(formData: FormData) {
                 imageUrls.push(imageUrl);
             }
 
-            // Save image URLs to database
             await saveImageUrls(property.id, imageUrls, supabase);
         } catch (error) {
-            // If image upload fails, delete the property and throw error
             await supabase.from('Property').delete().eq('id', property.id);
             throw error;
         }
@@ -174,16 +241,41 @@ export async function createProperty(formData: FormData) {
     redirect('/');
 }
 
+/**
+ * Updates an existing property with new data and manages image changes
+ * 
+ * @param propertyId - ID of the property to update
+ * @param formData - FormData containing updated property details, new images, and deleted image URLs
+ * 
+ * @description
+ * Process:
+ * 1. Validates user authentication and ownership
+ * 2. Extracts form fields, new images, and deleted image URLs
+ * 3. Updates property record in database
+ * 4. Removes deleted images from database and storage
+ * 5. Uploads new images to storage
+ * 6. Saves new image URLs to database
+ * 7. Redirects to home page on success
+ * 
+ * @throws Error if user not authenticated, doesn't own property, or update fails
+ * 
+ * @example
+ * ```typescript
+ * const formData = new FormData();
+ * formData.append('title', 'Updated Title');
+ * formData.append('images', newImageFile);
+ * formData.append('deletedImages', 'oldImageUrl');
+ * await updateProperty('property-123', formData);
+ * ```
+ */
 export async function updateProperty(propertyId: string, formData: FormData) {
     const supabase = await createClient();
 
-    // Get current user
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         throw new Error("You must be logged in to update a property");
     }
 
-    // Extract form fields
     const title = formData.get('title') as string;
     const location = formData.get('location') as string;
     const city = formData.get('city') as string;
@@ -194,12 +286,10 @@ export async function updateProperty(propertyId: string, formData: FormData) {
     const rate = parseInt(formData.get('rate') as string);
     const description = formData.get('description') as string;
 
-    // Extract images and deleted image URLs
     const images = formData.getAll('images') as File[];
     const validImages = images.filter(file => file instanceof File && file.size > 0);
     const deletedImageUrls = formData.getAll('deletedImages') as string[];
 
-    // Update property record
     const { error: propertyError } = await supabase
         .from('Property')
         .update({
@@ -214,15 +304,13 @@ export async function updateProperty(propertyId: string, formData: FormData) {
             description: description,
         })
         .eq('id', propertyId)
-        .eq('user_id', user.id); // Ensure user owns this property
+        .eq('user_id', user.id);
 
     if (propertyError) {
         throw new Error(propertyError.message);
     }
 
-    // Handle deleted images
     if (deletedImageUrls.length > 0) {
-        // Delete from database
         const { error: deleteDbError } = await supabase
             .from('PropertyImage')
             .delete()
@@ -232,13 +320,11 @@ export async function updateProperty(propertyId: string, formData: FormData) {
             console.error('Error deleting image records:', deleteDbError);
         }
 
-        // Delete from storage (non-blocking)
         for (const imageUrl of deletedImageUrls) {
             deleteImageFromStorage(imageUrl, supabase).catch(console.error);
         }
     }
 
-    // Upload new images if any
     if (validImages.length > 0) {
         const imageUrls: string[] = [];
 
@@ -248,11 +334,9 @@ export async function updateProperty(propertyId: string, formData: FormData) {
                 imageUrls.push(imageUrl);
             } catch (error) {
                 console.error('Error uploading image:', error);
-                // Continue with other images even if one fails
             }
         }
 
-        // Save new image URLs to database
         if (imageUrls.length > 0) {
             await saveImageUrls(propertyId, imageUrls, supabase);
         }
@@ -262,33 +346,49 @@ export async function updateProperty(propertyId: string, formData: FormData) {
     redirect('/');
 }
 
+/**
+ * Deletes a property and all associated images
+ * 
+ * @param propertyId - ID of the property to delete
+ * 
+ * @description
+ * Process:
+ * 1. Validates user authentication and ownership
+ * 2. Retrieves all associated image URLs
+ * 3. Deletes property from database (cascades to related tables)
+ * 4. Removes images from storage (non-blocking)
+ * 5. Redirects to home page on success
+ * 
+ * @throws Error if user not authenticated, doesn't own property, or deletion fails
+ * 
+ * @example
+ * ```typescript
+ * await deleteProperty('property-123');
+ * ```
+ */
 export async function deleteProperty(propertyId: string) {
     const supabase = await createClient();
 
-    // Get current user
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         throw new Error("You must be logged in to delete a property");
     }
 
-    // Get all images for this property before deletion
     const { data: images } = await supabase
         .from('PropertyImage')
         .select('image_url')
         .eq('property_id', propertyId);
 
-    // Delete property (this will cascade delete images and tags due to foreign key constraints)
     const { error } = await supabase
         .from('Property')
         .delete()
         .eq('id', propertyId)
-        .eq('user_id', user.id); // Ensure user owns this property
+        .eq('user_id', user.id);
 
     if (error) {
         throw new Error(error.message);
     }
 
-    // Delete images from storage (non-blocking)
     if (images && images.length > 0) {
         for (const image of images) {
             deleteImageFromStorage(image.image_url, supabase).catch(console.error);

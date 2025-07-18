@@ -49,12 +49,33 @@ interface AddPropertyFormProps {
     propertyTypes: PropertyType[];
 }
 
+/**
+ * AddPropertyForm Component
+ * 
+ * A comprehensive form for creating new properties with image upload capabilities.
+ * Uses React Hook Form for optimized performance and validation.
+ * 
+ * @param propertyTypes - Array of available property types fetched from database
+ * 
+ * Features:
+ * - Form validation using Zod schema
+ * - Multiple image upload with preview
+ * - Dynamic tag management
+ * - Star rating system
+ * - Optimized re-rendering (images/tags use separate state)
+ * - FormData submission for efficient file handling
+ * 
+ * @example
+ * ```tsx
+ * const propertyTypes = await getPropertyTypes();
+ * <AddPropertyForm propertyTypes={propertyTypes} />
+ * ```
+ */
 export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
     const router = useRouter();
     const { toast } = useToast();
     const [isPending, startTransition] = useTransition();
 
-    // Non-form state (things that don't need to be in the form)
     const [tags, setTags] = useState<string[]>([]);
     const [newTag, setNewTag] = useState("");
     const [images, setImages] = useState<File[]>([]);
@@ -74,6 +95,10 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
         },
     });
 
+    /**
+     * Adds a new tag to the property
+     * Prevents duplicates and empty tags
+     */
     const handleAddTag = () => {
         if (newTag.trim() && !tags.includes(newTag.trim())) {
             setTags(prev => [...prev, newTag.trim()]);
@@ -81,10 +106,18 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
         }
     };
 
+    /**
+     * Removes a tag from the property
+     * @param tagToRemove - The tag string to remove from the list
+     */
     const handleRemoveTag = (tagToRemove: string) => {
         setTags(prev => prev.filter(tag => tag !== tagToRemove));
     };
 
+    /**
+     * Handles Enter key press for tag input
+     * Prevents form submission and adds tag instead
+     */
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -92,24 +125,34 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
         }
     };
 
+    /**
+     * Handles file selection for image upload
+     * Enforces 5 image limit and filters valid files
+     */
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const newImages = Array.from(e.target.files);
-            setImages(prev => [...prev, ...newImages].slice(0, 5)); // Limit to 5 images
+            setImages(prev => [...prev, ...newImages].slice(0, 5));
         }
     };
 
+    /**
+     * Removes an image from the upload queue
+     * @param index - Array index of the image to remove
+     */
     const handleRemoveImage = (index: number) => {
         setImages(prev => prev.filter((_, i) => i !== index));
     };
 
+    /**
+     * Handles form submission
+     * Creates FormData with all form fields and images, then calls server action
+     */
     const onSubmit = (values: z.infer<typeof formSchema>) => {
         startTransition(async () => {
             try {
-                // Create FormData to include files
                 const formData = new FormData();
 
-                // Append form fields
                 formData.append('title', values.title);
                 formData.append('location', values.location);
                 formData.append('city', values.city);
@@ -120,7 +163,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                 formData.append('rate', values.rate.toString());
                 formData.append('description', values.description || '');
 
-                // Append images
                 images.forEach((image) => {
                     formData.append('images', image);
                 });
@@ -141,6 +183,11 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
         });
     };
 
+    /**
+     * Renders interactive star rating component
+     * @param currentRate - Current rating value
+     * @param onRateChange - Callback function when rating changes
+     */
     const renderStars = (currentRate: number, onRateChange: (rate: number) => void) => {
         return Array.from({ length: 5 }, (_, index) => (
             <Star
@@ -157,7 +204,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-6">
             <div className="max-w-2xl mx-auto">
-                {/* Header */}
                 <div className="flex items-center gap-4 mb-8">
                     <Button
                         variant="ghost"
@@ -172,10 +218,8 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                     </h1>
                 </div>
 
-                {/* Form */}
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        {/* Title */}
                         <FormField
                             control={form.control}
                             name="title"
@@ -196,7 +240,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                             )}
                         />
 
-                        {/* Location */}
                         <FormField
                             control={form.control}
                             name="location"
@@ -217,7 +260,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                             )}
                         />
 
-                        {/* City and Tags Row */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
@@ -283,7 +325,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                             </div>
                         </div>
 
-                        {/* Price Per Day */}
                         <FormField
                             control={form.control}
                             name="priceDay"
@@ -305,7 +346,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                             )}
                         />
 
-                        {/* Upload Photos */}
                         <div className="space-y-2">
                             <FormLabel className="text-base font-semibold text-navy-900" style={{ color: '#1e293b' }}>
                                 Upload Photos
@@ -352,7 +392,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                             </div>
                         </div>
 
-                        {/* Property Type and Bedrooms */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
@@ -409,7 +448,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                             />
                         </div>
 
-                        {/* Bathrooms */}
                         <FormField
                             control={form.control}
                             name="bathrooms"
@@ -437,7 +475,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                             )}
                         />
 
-                        {/* Stars Rating */}
                         <FormField
                             control={form.control}
                             name="rate"
@@ -456,7 +493,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                             )}
                         />
 
-                        {/* Description */}
                         <FormField
                             control={form.control}
                             name="description"
@@ -477,7 +513,6 @@ export function AddPropertyForm({ propertyTypes }: AddPropertyFormProps) {
                             )}
                         />
 
-                        {/* Save Button */}
                         <div className="pt-6">
                             <Button
                                 type="submit"

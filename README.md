@@ -1,105 +1,216 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# PropMatch
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+**Smart, Simple Property Management for Residential Agents**
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+PropMatch is a modern property management application built with Next.js and Supabase, designed to help real estate agents efficiently organize, and manage their property listings.
 
 ## Features
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+-   **🏠 Property Management**: Create, edit, and organize property listings
+-   **📸 Image Upload**: Multi-image upload with preview and management
+-   **🔍 Search & Filter**: Search properties by title, location, or city
+-   **⭐ Rating System**: 5-star rating system for properties
+-   **🏷️ Tag Management**: Dynamic tagging system for property features
+-   **👤 User Authentication**: Secure authentication with Supabase Auth
+-   **📱 Responsive Design**: Mobile-first responsive interface
+-   **🎯 Onboarding Flow**: Guided user onboarding experience
 
-## Demo
+## Tech Stack
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+-   **Framework**: Next.js 15 with App Router
+-   **Database**: Supabase (PostgreSQL)
+-   **Authentication**: Supabase Auth
+-   **Storage**: Supabase Storage for image uploads
+-   **Styling**: Tailwind CSS + shadcn/ui components
+-   **Forms**: React Hook Form with Zod validation
+-   **State Management**: React hooks with optimized re-rendering
+-   **Icons**: Lucide React
+-   **Notifications**: Sonner toast system
 
-## Deploy to Vercel
+## Getting Started
 
-Vercel deployment will guide you through creating a Supabase account and project.
+### Prerequisites
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+-   Node.js 18+
+-   npm/yarn/pnpm
+-   Supabase account
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+### Installation
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+1. **Clone the repository**
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+    ```bash
+    git clone <your-repo-url>
+    cd propmatch
+    ```
 
-## Clone and run locally
+2. **Install dependencies**
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+    ```bash
+    npm install
+    ```
 
-2. Create a Next.js app using the Supabase Starter template npx command
+3. **Set up environment variables**
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+    Create a `.env.local` file in the root directory:
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+    Get these values from your [Supabase project settings](https://supabase.com/dashboard/project/_/settings/api).
 
-3. Use `cd` to change into the app's directory
+4. **Set up the database**
 
-   ```bash
-   cd with-supabase-app
-   ```
+    Run the migrations in your Supabase SQL editor:
 
-4. Rename `.env.example` to `.env.local` and update the following:
+    ```bash
+    # Copy and run the SQL files in order:
+    # 1. supabase/migrations/202507172020.sql (schema)
+    # 2. supabase/migrations/202507172024.sql (seed data)
+    # 3. supabase/migrations/202507172025.sql (security policies)
+    ```
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
+5. **Set up Supabase Storage**
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+    Create a storage bucket named `property-images` in your Supabase dashboard:
 
-5. You can now run the Next.js local development server:
+    - Go to Storage → New Bucket
+    - Name: `property-images`
+    - Public: ✅ Enabled
+    - File size limit: 50MB
+    - Allowed file types: `image/jpeg,image/png,image/webp,image/gif`
 
-   ```bash
-   npm run dev
-   ```
+6. **Run the development server**
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+    ```bash
+    npm run dev
+    ```
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+## Project Structure
 
-## Feedback and issues
+```
+propmatch/
+├── app/                          # Next.js App Router
+│   ├── actions/                  # Server Actions
+│   │   └── property-actions.ts   # Property CRUD & image upload logic
+│   ├── auth/                     # Authentication pages
+│   │   ├── login/               # Login page
+│   │   ├── sign-up/             # Registration page
+│   │   └── [other-auth-pages]/  # Password reset, etc.
+│   ├── add-property/            # Add new property page
+│   ├── edit-property/[id]/      # Edit existing property page
+│   ├── onboarding/              # User onboarding flow
+│   ├── protected/               # Protected route examples
+│   ├── layout.tsx               # Root layout with providers
+│   ├── page.tsx                 # Home page (Property Dashboard)
+│   └── globals.css              # Global styles
+│
+├── components/                   # Reusable React components
+│   ├── ui/                      # shadcn/ui base components
+│   │   ├── button.tsx
+│   │   ├── input.tsx
+│   │   ├── form.tsx
+│   │   └── [other-ui-components]
+│   ├── tutorial/                # Tutorial/help components
+│   ├── property-dashboard.tsx   # Main dashboard component
+│   ├── property-card.tsx        # Individual property display
+│   ├── add-property-form.tsx    # Property creation form
+│   ├── edit-property-form.tsx   # Property editing form
+│   ├── onboarding-splash.tsx    # Splash screen component
+│   ├── onboarding-steps.tsx     # Onboarding wizard
+│   ├── auth-button.tsx          # Authentication controls
+│   └── [other-components]
+│
+├── lib/                         # Utility libraries
+│   ├── supabase/               # Supabase client configuration
+│   │   ├── client.ts           # Client-side Supabase client
+│   │   ├── server.ts           # Server-side Supabase client
+│   │   └── middleware.ts       # Supabase SSR middleware
+│   └── utils.ts                # General utility functions
+│
+├── supabase/                    # Database schema & migrations
+│   └── migrations/
+│       ├── 202507172020.sql    # Database schema setup
+│       ├── 202507172024.sql    # Seed data
+│       └── 202507172025.sql    # Row Level Security policies
+│
+├── docs/                        # Project documentation
+│   └── IMAGE_UPLOAD_SYSTEM.md  # Image upload system docs
+│
+├── middleware.ts                # Next.js middleware (auth + onboarding)
+├── components.json              # shadcn/ui configuration
+├── tailwind.config.ts           # Tailwind CSS configuration
+├── next.config.ts               # Next.js configuration
+└── package.json                 # Dependencies and scripts
+```
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+## Architecture Overview
 
-## More Supabase examples
+### Database Schema
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+-   **Property**: Main property listings with user ownership
+-   **PropertyType**: Lookup table for property types (apartment, house, etc.)
+-   **PropertyImage**: Image URLs linked to properties
+-   **PropertyTag**: Tag system for property features
+-   **Property_Tag_Join**: Many-to-many relationship for property tags
+
+### Authentication Flow
+
+1. **Onboarding**: First-time users see splash screen + guided steps
+2. **Auth Routes**: Login/signup with Supabase Auth
+3. **Protected Routes**: Middleware redirects unauthenticated users
+4. **Row Level Security**: Database-level access control
+
+### Property Management Flow
+
+1. **Dashboard**: View and search existing properties
+2. **Add Property**: Multi-step form with image upload
+3. **Edit Property**: Update details and manage images
+4. **Image Storage**: Supabase Storage with organized file structure
+
+### Image Upload System
+
+-   **Storage**: Organized in `property-images/{propertyId}/` folders
+-   **Upload**: Sequential processing with error handling
+-   **Cleanup**: Automatic deletion when properties are removed
+-   **Security**: User ownership validation and file type restrictions
+
+## Key Features
+
+### Property Dashboard
+
+-   Grid layout of property cards
+-   Real-time search functionality
+-   Add new property quick action
+-   Loading states and empty state handling
+
+### Property Forms
+
+-   **React Hook Form**: Optimized performance with minimal re-renders
+-   **Zod Validation**: Type-safe form validation
+-   **Image Upload**: Multi-image support with preview
+-   **Tag Management**: Dynamic tag addition/removal
+-   **Star Rating**: Interactive 5-star rating system
+
+### User Experience
+
+-   **Mobile-First**: Responsive design for all screen sizes
+-   **Toast Notifications**: User feedback for all actions
+-   **Loading States**: Progress indicators for async operations
+-   **Error Handling**: Graceful error recovery and user messaging
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
