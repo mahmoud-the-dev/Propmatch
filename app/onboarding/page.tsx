@@ -7,9 +7,6 @@ import { OnboardingSteps } from "@/components/onboarding-steps";
 
 export default function OnboardingPage() {
     const [showSplash, setShowSplash] = useState(true);
-
-    console.log("🚀🚀🚀 ~ file: page.tsx:11 ~ OnboardingPage ~ showSplash:", showSplash)
-
     const router = useRouter();
 
     useEffect(() => {
@@ -21,9 +18,9 @@ export default function OnboardingPage() {
     }, []);
 
     const handleOnboardingComplete = () => {
-        // Set the onboarded cookie and redirect to protected page
+        // Set the onboarded cookie and redirect to home page
         document.cookie = "onboarded=true; path=/; max-age=" + (365 * 24 * 60 * 60); // 1 year
-        router.push("/protected");
+        router.push("/");
     };
 
     if (showSplash) {

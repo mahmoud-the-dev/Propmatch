@@ -49,10 +49,7 @@ export async function updateSession(request: NextRequest) {
   const cookies = request.cookies.getAll();
   const onboarded = cookies.find((cookie) => cookie.name === "onboarded")?.value === "true";
 
-  console.log("🚀🚀🚀 ~ file: middleware.ts:52 ~ updateSession ~ onboarded:", onboarded)
-
-  
-  if (!onboarded &&   !request.nextUrl.pathname.startsWith("/onboarding")) {
+  if (!onboarded && !request.nextUrl.pathname.startsWith("/onboarding")) {
     const url = request.nextUrl.clone();
     url.pathname = "/onboarding";
     request.cookies.set("onboarded", "true");
